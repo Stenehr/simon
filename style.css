@@ -181,3 +181,10 @@ button:focus {
     right: 57px;
     font-size: 14px;
 }
+
+
+@media (max-width: 480px) {
+    .container {
+        width: 480px;
+    }
+}
