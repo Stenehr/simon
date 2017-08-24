@@ -1,5 +1,4 @@
 
-
 var Game = {
     options: [
         {
@@ -21,8 +20,19 @@ var Game = {
     ],
     currentGame: [],
     playerGame: [],
+    currentLevel: 0,
     gameCounter: 0,
     playerGuess: false,
+    bindEvents: function () {
+        $('#startBtn').on('click', this.startGame.bind(this));
+    },
+    startGame: function () {
+        this.gamePlay();
+        this.enableUserClicking();
+    },
+    enableUserClicking: function () {
+        $('.colorBtn').on('click', function (event) { Game.checkPlayerAnswer(event) });
+    },
     randomNumber: function () {
         return Math.floor(Math.random() * 4);
     },
@@ -30,11 +40,14 @@ var Game = {
         this.currentGame.push(this.options[this.randomNumber()]);
     },
     gamePlay: function () {
+        var currentLevel;
         this.playerGame = [];
         this.gameCounter = 0;
 
         this.nextLevel();
-        
+        this.currentLevel = this.currentGame.length;
+
+        View.displayCurrentLevel(this.currentLevel);
         View.resetBackground();
         View.flashAllFields(this.currentGame, 500);
     },
@@ -57,37 +70,41 @@ var Game = {
         }
 
         if (this.playerGame.length <= 0) {
-            View.displayWrongGuessAlert();
+            var index = 0;
+            View.changeMainPanelColor('#FF0000')
+               
+            var intervalId = setInterval(function () {
+                View.resetBackground();
+                index++;
+
+                if (index > 0) {
+                    View.flashAllFields(this.currentGame, 500);
+                    clearInterval(intervalId);
+                }
+            }.bind(this), 800);
+
+
+            return;
         }
 
         if (this.playerGame.length === this.currentGame.length) {
-            setTimeout(View.displayOnCorrectCycle, 300);
-            setTimeout(this.gamePlay.bind(this), 1000)
+            setTimeout(View.changeMainPanelColor('#60FF00'), 50);
+            setTimeout(this.gamePlay.bind(this), 800)
         }
 
     }
 }
 
 
-
 var View = {
-    displayWrongGuessAlert: function () {
-        var i = 0;
-        var intervalId = setInterval(function () {
-            $('#display').text('!!!');
-
-            setTimeout(function () {
-                $('#display').text('');
-            }, 100)
-
-            i++;
-            if (i >= 3) {
-                clearInterval(intervalId);
-            }
-        }, 300);
+    displayCurrentLevel: function (level) {
+        if (level < 10) {
+            level = '0' + level;
+        }
+        $('#display').text(level);
     },
-    displayOnCorrectCycle: function () {
-        $('.controlsHolder').css('background-color', 'green');
+    changeMainPanelColor: function (color) {
+        $('.controlsHolder').css('background-color', color);
     },
     resetBackground: function () {
         $('.controlsHolder').css('background-color', 'gray');
@@ -112,52 +129,4 @@ var View = {
     
 }
 
-$('.colorBtn').on('click', function (event) { Game.checkPlayerAnswer(event)});
-
-// $('.colorBtn').on('click', function (event) {
-//     var selectedColor = Game.options[$(this).data('value')];
-    
-//     Game.playerGame.push(selectedColor);
-//     highlightField(selectedColor, 300);
-
-//     for (var i = 0; i < Game.playerGame.length; i++) {
-//         if (Game.playerGame[i].id !== Game.currentGame[i].id) {
-//             Game.playerGame = [];
-//             break;
-//         }
-//     }
-
-// });
-
-
-var showedButtons = [];
-
-// A function to generate a random number between 0-3.
-function randomNumber() {
-    return Math.floor(Math.random() * 4);
-}
-
-// Push the random number value to the end of the array.
-function addToGame(arr, value) {
-    arr.push(value);
-}
-
-function highlightField(item, time) {
-    $(item.id).addClass(item.flashClass);
-    setTimeout(function () {
-        $(item.id).removeClass(item.flashClass);
-    }, time);
-}
-
-function displayFields(arr, time) {
-    var i = 0;
-
-    var intervalId = setInterval(function () {
-        highlightField(arr[i], time);
-        i++;
-        if (i === arr.length) {
-            clearInterval(intervalId);
-        }
-    }, time);
-}
-
+Game.bindEvents();
