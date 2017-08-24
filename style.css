@@ -185,6 +185,10 @@ button:focus {
 
 @media (max-width: 480px) {
     .container {
-        width: 480px;
+        width: 100%;
+    }
+
+    .innerContainer {
+        width: 100%;
     }
 }
